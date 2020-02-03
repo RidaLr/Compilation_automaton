@@ -2,15 +2,16 @@
 #define STRUCTURES_H
 
 typedef struct etat etat;
+typedef struct transition transition;
 
-typedef struct transition{
+struct transition{
 	
 	char c;
 	etat* curr;
 	etat* suiv;
 	transition* tsuiv;
 	
-}transition;
+};
 
 
 struct etat{
