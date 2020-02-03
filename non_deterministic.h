@@ -1,5 +1,5 @@
-#ifndef STRUCTURES_H
-#define STRUCTURES_H
+#ifndef NON8DETERMINISTIC_H
+#define NON8DETERMINISTIC_H
 
 typedef struct etat etat;
 typedef struct transition transition;
@@ -31,17 +31,6 @@ typedef struct AFND{
 	transition* delta; //ensemble des transitions de l'automate
 	
 }AFND;
-
-
-typedef struct AFD{
-	
-	int s;
-	etat* Q;
-	etat* F;
-	char* Sigma;
-	transition* delta;
-	
-}AFD;
 
 
 AFND automate_vide();
