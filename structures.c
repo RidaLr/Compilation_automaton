@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "structures.h"
+#define C_SIZE 1024
 
 AFND automate_vide()
 {
 	AFND automate;
 	etat e;
 	e.num = 0;
-	e.t = NULL;
 	e.type = 0;
 	
 	automate.s = 0;
@@ -26,7 +27,6 @@ AFND automate_Seul_Mot_vide()
 	AFND automate;
 	etat e;
 	e.num = 0;
-	e.t = NULL;
 	e.type = 1;
 	
 	automate.s = 0;
@@ -49,27 +49,27 @@ AFND automate_standard(char c)
 	transition *tr;
 	
 	e0->num = 0;
-	e0->t = NULL;
 	e0->type = 1;
 	
 	
 	e1->num = 1;
-	e1->t = NULL;
 	e1->type = 1;
+	
+	e0->suiv = e1;
 	
 	tr->c = c;
 	tr->curr = e0;
 	tr->suiv = e1;
-	
-	e0->t = tr;
+	tr->tsuiv = NULL;
 	
 	automate.s = 0;
 	automate.Q = malloc(sizeof(etat));
-	automate.Q = e0;
-	automate.Q = e1;
+	automate.Q->num = 0;
+	automate.Q->suiv = e1;
 	
 	automate.F = e1;
-	automate.Sigma = &c;
+	automate.Sigma = (char*)malloc(sizeof(char)*C_SIZE);
+	automate.Sigma[0] = c;
 	automate.delta = tr;
 	
 	return automate;
@@ -103,10 +103,38 @@ void Display(AFND automate)
 	printf(" s = %d \n",automate.s);
 	
 	printf("Q = {");
-	for(int i=0; i< sizeof(etat); i++)
+	while(automate.Q)
 	{
 		printf("%d, ",automate.Q->num);
+		automate.Q = automate.Q->suiv;
 	}
 	printf("}\n\n");
+	
+	size_t length = strlen(automate.Sigma);
+	printf("Sigma = {");
+	for(int i=0; i < length; i++)
+	{
+		printf("%c, ",automate.Sigma[i]);
+	}
+	printf("}\n\n");
+	
+	
+	printf("F = {");
+	while(automate.F)
+	{
+		printf("%d, ",automate.F->num);
+		automate.F = automate.F->suiv;
+	}
+	printf("}\n\n");
+	
+	
+	printf("Delta = {");
+	while(automate.delta)
+	{
+		printf("(%d, %c, %d) ,",automate.delta->curr->num,automate.delta->c,automate.delta->suiv->num);
+		automate.delta = automate.delta->tsuiv;
+	}
+	printf("}\n\n");
+	
 	
 }
