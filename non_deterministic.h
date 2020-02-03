@@ -1,37 +1,6 @@
 #ifndef NON8DETERMINISTIC_H
 #define NON8DETERMINISTIC_H
-
-typedef struct etat etat;
-typedef struct transition transition;
-
-struct transition{
-	
-	char c;
-	etat* curr;
-	etat* suiv;
-	transition* tsuiv;
-	
-};
-
-
-struct etat{
-	
-	int num;
-	etat* suiv;
-	int type; //0 non accepteur /1 accepteur
-	
-};
-
-typedef struct AFND{
-	
-	int s; //Ã©tat initial
-	etat* Q; // ensemble fini d'Ã©tat
-	etat* F; //ensemble des Ã©tats accepteurs
-	char* Sigma; //alphabet de l'automate
-	transition* delta; //ensemble des transitions de l'automate
-	
-}AFND;
-
+#include "structures.h"
 
 AFND automate_vide();
 AFND automate_Seul_Mot_vide();
