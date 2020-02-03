@@ -14,7 +14,7 @@ AFND *automate_vide()
     e->transitions = NULL;
 	
 	automate->s = e;
-	automate->Q = malloc(sizeof(etat));
+	automate->Q = (etat*)malloc(sizeof(etat));
 	automate->Q = e;
     automate->nbre_etats = 1;
 	//automate.F = NULL;
