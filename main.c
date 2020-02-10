@@ -29,7 +29,12 @@ int main()
 	printf("\n CONCATENATION \n");
 	Display(automate6);
 	
-	//AFND *automate7 = farmeture_automate(automate3);
+	
+	AFND *aFermTest = automateTestPlein();
+	
+	AFND *automate7 = farmeture_automate(aFermTest);
+	printf("\n FERMETURE \n");
+	Display(automate7);
 	
 	return 0;
 }
