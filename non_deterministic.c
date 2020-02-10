@@ -31,31 +31,18 @@ AFND *automate_Seul_Mot_vide()
 	etat *init = (etat*)(malloc(sizeof(etat)));
 	init->num = 0;
 	init->type = ACCEPTEUR;
-
-
-    //transition* transitions = (transition*)(malloc(sizeof(transition)));
-    //transitions->c = NULL;
-
-	//etat *fin = (etat*)(malloc(sizeof(etat)));
-	//fin->num = 1;
-	//fin->type = ACCEPTEUR;
-    //fin->transitions = NULL;
-    //fin->nbre_transitions = 0;
-    //transitions->suiv = fin;
 	
-    init->transitions = NULL;
-    init->nbre_transitions = 0;
+	init->transitions = NULL;
+        init->nbre_transitions = 0;
 	
-    AFND *automate = (AFND*) (malloc(sizeof(AFND)));
+        AFND *automate = (AFND*) (malloc(sizeof(AFND)));
 	automate->s = init;
 	automate->Q = (etat*)malloc(sizeof(etat) * 1);
 	automate->Q[0] = *init;
-   // automate->Q[1] = *fin;
-    automate->nbre_etats = 1;
-	//automate.F = NULL;
+   
+        automate->nbre_etats = 1;
 	automate->Sigma = (char*)malloc(sizeof(char));
 	automate->Sigma = NULL;
-	//automate->delta = NULL;
 	
 	return automate;
 	
@@ -91,8 +78,6 @@ AFND *automate_standard(char c)
     automate->nbre_etats = 2;
     automate->Sigma = (char*)malloc(sizeof(char));
     automate->Sigma[0] = c;
-    //automate->delta = (transition*)malloc(sizeof(transition));
-    //automate->delta = transitions;
 	
 	return automate;
 	
@@ -218,15 +203,15 @@ AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 			nextNum++;
 		}
 		
-		//Display(automate1);
+
 		for(int i =0;i<automate1->nbre_etats;i++)
 		{
 			
 			if(automate1->Q[i].type==ACCEPTEUR)
 			{
-				//printf("%d est accepteur %d\n", automate1->Q[i].num, automate1->Q[i].nbre_transitions);
+
 				automate1->Q[i].transitions = (transition*) realloc(automate1->Q[i].transitions, sizeof(transition) * (automate1->Q[i].nbre_transitions + automate2->s->nbre_transitions));
-				//printf("###### Q=%d\n",automate1->Q[i].num);
+
 				
 				for(int j =0;j<automate2->s->nbre_transitions;j++)
 				{
@@ -257,28 +242,33 @@ AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 	return automate1;
 }
 
-//TODO : code not working !
+
 AFND *farmeture_automate(AFND *automate)
 {
 	
-	transition *liste = (transition*)(malloc(sizeof(transition)));
-	
-	for(int i=0; i< automate->nbre_etats; i++){
-		for(int j=0; j< automate->Q[i].nbre_transitions; j++){
-		
-			liste[j] = automate->Q[j].transitions[j];
-		}	
-	}
-	
-	for(int i=0; i< automate->nbre_etats; i++){
-		for(int j=0; j< automate->Q[i].nbre_transitions; j++){
-			printf("%d %c %d\n",automate->Q[j].num,automate->Q[j].transitions->c,automate->Q[j].transitions->suiv->num);
+	for(int i =0;i<automate->nbre_etats;i++)
+		{
+			
+			if(automate->Q[i].type==ACCEPTEUR)
+			{
+			
+				automate->Q[i].transitions = (transition*) realloc(automate->Q[i].transitions, sizeof(transition) * (automate->Q[i].nbre_transitions + automate->s->nbre_transitions));
+							
+				for(int j =0;j<automate->s->nbre_transitions;j++)
+				{
+				
+					transition trans;
+					trans.c = automate->s->transitions[j].c;
+					trans.suiv = automate->s->transitions[j].suiv;
+					automate->Q[i].transitions[automate->Q[i].nbre_transitions] = trans;
+					automate->Q[i].nbre_transitions++;
+				
+				}
+			}
 		}
-	}
 	
 	return automate;
 }
-
 
 void Display(AFND *automate)
 {
@@ -301,41 +291,9 @@ void Display(AFND *automate)
         }
         printf(" }\n\n");
 	}
-	/*printf("lenght \n");
-	int length = strlen(automate->Sigma);
-	printf("lenght = %d \n",length);
-	if(length == 0)
-	{
-		printf("Sigma = {}\n");
-	}
-	else
-	{
-		printf("Sigma = {");
-		for(int i=0; i < length; i++)
-		{
-			printf("%c, ",automate->Sigma[i]);
-		}
-		printf("}\n\n");
-	}*/
-	/*
-	printf("F = {");
-	while(automate.F)
-	{
-		printf("%d, ",automate.F->num);
-		automate.F = automate.F->suiv;
-	}
-	printf("}\n\n");
-	
-	
-	printf("Delta = {");
-	while(automate->delta)
-	{
-		printf("(%d, %c, %d) ,",automate->delta->act->num,automate->delta->c,automate->delta->suiv->num);
-		automate->delta = automate->delta->suiv;
-	}
-	printf("}\n\n");
-    */
 }	
+
+
 AFND *automateTestPlein()
 {
 
@@ -401,12 +359,12 @@ AFND *automateTestPlein()
     automate->Q[2] = *deux;
     automate->Q[3] = *trois;
     automate->nbre_etats = 4;
-    //automate.F = NULL;
+
     automate->Sigma = (char *)malloc(sizeof(char) * 2);
     automate->Sigma[0] = 'a';
     automate->Sigma[1] = 'b';
     automate->taille_alphabet = 2;
-    //automate.delta = NULL;
+
 
     return automate;
 }
