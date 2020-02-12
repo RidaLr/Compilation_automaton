@@ -5,6 +5,25 @@
 #include "non_deterministic.h"
 #define C_SIZE 1024
 
+
+void Desalloc_AFND(AFND *automate)
+{
+	etat* state;
+	for(int i=0; i<automate->nbre_etats; i++)
+	{
+		for(int j=0; j<automate->Q[i].nbre_transitions; j++)
+		{
+			state = automate->Q[i].transitions[j].suiv;
+			free(state);
+		}
+		free(automate->Q[i].transitions);
+	}
+	
+	free(automate->Sigma);
+	free(automate->s);
+		
+}
+
 AFND *automate_vide()
 {
 	AFND *automate = (AFND*) (malloc(sizeof(AFND)));
@@ -31,18 +50,31 @@ AFND *automate_Seul_Mot_vide()
 	etat *init = (etat*)(malloc(sizeof(etat)));
 	init->num = 0;
 	init->type = ACCEPTEUR;
+
+
+    //transition* transitions = (transition*)(malloc(sizeof(transition)));
+    //transitions->c = NULL;
+
+	//etat *fin = (etat*)(malloc(sizeof(etat)));
+	//fin->num = 1;
+	//fin->type = ACCEPTEUR;
+    //fin->transitions = NULL;
+    //fin->nbre_transitions = 0;
+    //transitions->suiv = fin;
 	
-	init->transitions = NULL;
-        init->nbre_transitions = 0;
+    init->transitions = NULL;
+    init->nbre_transitions = 0;
 	
-        AFND *automate = (AFND*) (malloc(sizeof(AFND)));
+    AFND *automate = (AFND*) (malloc(sizeof(AFND)));
 	automate->s = init;
 	automate->Q = (etat*)malloc(sizeof(etat) * 1);
 	automate->Q[0] = *init;
-   
-        automate->nbre_etats = 1;
+   // automate->Q[1] = *fin;
+    automate->nbre_etats = 1;
+	//automate.F = NULL;
 	automate->Sigma = (char*)malloc(sizeof(char));
 	automate->Sigma = NULL;
+	//automate->delta = NULL;
 	
 	return automate;
 	
@@ -78,6 +110,8 @@ AFND *automate_standard(char c)
     automate->nbre_etats = 2;
     automate->Sigma = (char*)malloc(sizeof(char));
     automate->Sigma[0] = c;
+    //automate->delta = (transition*)malloc(sizeof(transition));
+    //automate->delta = transitions;
 	
 	return automate;
 	
@@ -203,16 +237,15 @@ AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 			nextNum++;
 		}
 		
-
+		
 		for(int i =0;i<automate1->nbre_etats;i++)
 		{
 			
 			if(automate1->Q[i].type==ACCEPTEUR)
 			{
-
+			
 				automate1->Q[i].transitions = (transition*) realloc(automate1->Q[i].transitions, sizeof(transition) * (automate1->Q[i].nbre_transitions + automate2->s->nbre_transitions));
-
-				
+							
 				for(int j =0;j<automate2->s->nbre_transitions;j++)
 				{
 					if(automate2->s->transitions[j].suiv->num != automate2->s->num)
@@ -270,6 +303,7 @@ AFND *farmeture_automate(AFND *automate)
 	return automate;
 }
 
+
 void Display(AFND *automate)
 {
 	
@@ -291,6 +325,7 @@ void Display(AFND *automate)
         }
         printf(" }\n\n");
 	}
+	
 }	
 
 
@@ -359,12 +394,45 @@ AFND *automateTestPlein()
     automate->Q[2] = *deux;
     automate->Q[3] = *trois;
     automate->nbre_etats = 4;
-
+    
     automate->Sigma = (char *)malloc(sizeof(char) * 2);
     automate->Sigma[0] = 'a';
     automate->Sigma[1] = 'b';
     automate->taille_alphabet = 2;
 
-
     return automate;
+}
+
+void Test_AFND()
+{
+	//Le test de l'automate standard reconnaissnat le langage vide
+	AFND *aVide = automate_vide();
+	Display(aVide);
+	
+	//Le test de l'automate standard reconnaissant le langage composÃ© du seul mot vide
+	AFND *aSeulMot = automate_Seul_Mot_vide();
+	Display(aSeulMot);
+	
+	//Le test de l'automate standard reconnaissant le langage composÃ© d'un mot d'un caractere passÃ© en parametre
+	AFND *aStandard = automate_standard('a');
+	Display(aStandard);
+	
+	//Automates de test 
+	AFND *aTest1 = automateTestPlein();
+	AFND *aTest2 = automateTestPlein();
+	AFND *aTest3 = automateTestPlein();
+	AFND *aTest4 = automateTestPlein();
+	
+	//Le test qui renvoi un automate standard reconnaissant la reunion des langages de deux automates  
+	AFND *aReunion = reunion_automate(aTest1, aTest2);
+	Display(aReunion);
+	
+	//Le test qui renvoi un automate standard reconnaissant la concatenation des langages de deux automates standard
+	AFND *aConcat = concatenation_automate(aTest3, aTest4);
+	Display(aConcat);
+	
+	//Le test qui renvoi un automate standard reconnaissant la fermeture iterative de Kleene de son langage 
+	AFND *aFermTest = automateTestPlein();
+	AFND *aFermeKleene = farmeture_automate(aFermTest);
+	Display(aFermeKleene);
 }
