@@ -3,6 +3,7 @@
 #include "structures.h"
 #include <stdio.h>
 #include <stdlib.h>
+
 AFND *automate_vide();
 AFND *automate_Seul_Mot_vide();
 AFND *automate_standard(char c);
@@ -12,4 +13,7 @@ AFND *concatenation_automate(AFND *a1, AFND *a2);
 AFND *farmeture_automate(AFND *automate);
 void Display(AFND *automate);
 AFND *automateTestPlein();
+void Desalloc_AFND(AFND *automate);
+void Test_AFND();
+
 #endif
