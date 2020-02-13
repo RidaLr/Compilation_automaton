@@ -11,11 +11,6 @@ void Desalloc_AFND(AFND *automate)
 	etat* state;
 	for(int i=0; i<automate->nbre_etats; i++)
 	{
-		for(int j=0; j<automate->Q[i].nbre_transitions; j++)
-		{
-			state = automate->Q[i].transitions[j].suiv;
-			free(state);
-		}
 		free(automate->Q[i].transitions);
 	}
 	
@@ -24,6 +19,7 @@ void Desalloc_AFND(AFND *automate)
 		
 }
 
+//La fonction qui renvoie un automate standard reconnaissant le langage vide
 AFND *automate_vide()
 {
 	AFND *automate = (AFND*) (malloc(sizeof(AFND)));
@@ -36,14 +32,16 @@ AFND *automate_vide()
 	automate->Q = (etat*)malloc(sizeof(etat));
 	automate->Q = e;
     automate->nbre_etats = 1;
-	//automate.F = NULL;
+
 	automate->Sigma = (char*)malloc(sizeof(char));
 	automate->Sigma = NULL;
-	//automate->delta = NULL;
+
 	
 	return automate;
 }
 
+
+//La fonction qui renvoie un automate standard reconnaissant le langage composé du seul mot vide
 AFND *automate_Seul_Mot_vide()
 {
 	
@@ -51,16 +49,6 @@ AFND *automate_Seul_Mot_vide()
 	init->num = 0;
 	init->type = ACCEPTEUR;
 
-
-    //transition* transitions = (transition*)(malloc(sizeof(transition)));
-    //transitions->c = NULL;
-
-	//etat *fin = (etat*)(malloc(sizeof(etat)));
-	//fin->num = 1;
-	//fin->type = ACCEPTEUR;
-    //fin->transitions = NULL;
-    //fin->nbre_transitions = 0;
-    //transitions->suiv = fin;
 	
     init->transitions = NULL;
     init->nbre_transitions = 0;
@@ -69,17 +57,16 @@ AFND *automate_Seul_Mot_vide()
 	automate->s = init;
 	automate->Q = (etat*)malloc(sizeof(etat) * 1);
 	automate->Q[0] = *init;
-   // automate->Q[1] = *fin;
+  
     automate->nbre_etats = 1;
-	//automate.F = NULL;
+	
 	automate->Sigma = (char*)malloc(sizeof(char));
 	automate->Sigma = NULL;
-	//automate->delta = NULL;
 	
 	return automate;
-	
 }
 
+// La fonction qui renvoie un automate standard reconnaissant le langage composé d’un mot d’un caractère passé en paramètre
 AFND *automate_standard(char c)
 {
 		
@@ -110,14 +97,12 @@ AFND *automate_standard(char c)
     automate->nbre_etats = 2;
     automate->Sigma = (char*)malloc(sizeof(char));
     automate->Sigma[0] = c;
-    //automate->delta = (transition*)malloc(sizeof(transition));
-    //automate->delta = transitions;
 	
 	return automate;
-	
 }
 
-
+/*La fonction qui prend deux automates standard en paramètre, et renvoie un automate standard reconnaissant 
+ *la réunion de leurs langages*/
 AFND *reunion_automate(AFND* automate1, AFND* automate2)
 {
 	
@@ -196,7 +181,8 @@ AFND *reunion_automate(AFND* automate1, AFND* automate2)
 	return automate1;
 }
 
-
+/* La fonction qui prend deux automates standard en paramètre, et renoie un automate standard reconnaissant 
+ *la concaténation de leurs langages*/
 AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 {
 	
@@ -275,7 +261,8 @@ AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 	return automate1;
 }
 
-
+/* La fonction qui prend un automate standard en paramètre, et renvoie un automate
+ *standard reconnaissant la fermeture itérative de Kleene de son langage*/
 AFND *farmeture_automate(AFND *automate)
 {
 	
@@ -303,7 +290,7 @@ AFND *farmeture_automate(AFND *automate)
 	return automate;
 }
 
-
+//La methode qui affiche un automate passe en parametres
 void Display(AFND *automate)
 {
 	
@@ -312,15 +299,16 @@ void Display(AFND *automate)
 	printf("s = %d \n",automate->s->num);
 	
 	for (int i = 0; i < automate->nbre_etats; i++)
-    {
+    	{
 		printf("+ ETAT: %d\n ",automate->Q[i].num);
-        if(automate->Q[i].type == ACCEPTEUR)
-            printf(" > TYPE: ACCEPTEUR\n ");
-        else
-            printf(" > TYPE: NON ACCEPTEUR\n ");
+        	if(automate->Q[i].type == ACCEPTEUR)
+            		printf(" > TYPE: ACCEPTEUR\n ");
+        	else
+            		printf(" > TYPE: NON ACCEPTEUR\n ");
         
         printf(" TRANSITIONS = {");
-        for (int j = 0; j < automate->Q[i].nbre_transitions; j++){
+        for (int j = 0; j < automate->Q[i].nbre_transitions; j++)
+	{
             printf("(%d, %c, %d),", automate->Q[i].num, automate->Q[i].transitions[j].c, automate->Q[i].transitions[j].suiv->num);
         }
         printf(" }\n\n");
@@ -328,7 +316,7 @@ void Display(AFND *automate)
 	
 }	
 
-
+//La fonction qui retourne un automate de test vu en TD's
 AFND *automateTestPlein()
 {
 
@@ -403,6 +391,7 @@ AFND *automateTestPlein()
     return automate;
 }
 
+//Le methode qui test toutes les fonction implementes 
 void Test_AFND()
 {
 	//Le test de l'automate standard reconnaissnat le langage vide
