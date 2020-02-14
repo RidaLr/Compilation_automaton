@@ -3,14 +3,15 @@
 #include "structures.h"
 #include "non_deterministic.h"
 #include "deterministic.h"
+#include "menu.h"
 
 int main()
 {
-	AFND *automate = automate_Seul_Mot_vide();
-	Display(automate);
+	while (1)
+	{
+		//system("clear");
+		computeChoice(displayMenu());
+	}
 
-	AFND *automate2 = automate_vide();
-	Display(automate2);
-	
 	return 0;
 }

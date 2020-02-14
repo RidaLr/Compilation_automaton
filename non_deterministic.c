@@ -17,6 +17,7 @@ AFND *automate_vide()
 	automate->Q = malloc(sizeof(etat));
 	automate->Q = e;
     automate->nbre_etats = 1;
+	automate->taille_alphabet  =0;	
 	//automate.F = NULL;
 	//automate.Sigma = NULL;
 	//automate.delta = NULL;
@@ -51,6 +52,7 @@ AFND *automate_Seul_Mot_vide()
 	automate->Q[0] = *init;
     automate->Q[1] = *fin;
     automate->nbre_etats = 2;
+	automate->taille_alphabet = 1;
 	//automate.F = NULL;
 	//automate.Sigma = NULL;
 	//automate.delta = NULL;
