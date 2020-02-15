@@ -424,4 +424,16 @@ void Test_AFND()
 	AFND *aFermTest = automateTestPlein();
 	AFND *aFermeKleene = farmeture_automate(aFermTest);
 	Display(aFermeKleene);
+	
+	Desalloc_AFND(aVide);
+	Desalloc_AFND(aSeulMot);
+	Desalloc_AFND(aStandard);
+	Desalloc_AFND(aTest1);
+	Desalloc_AFND(aTest2);
+	Desalloc_AFND(aTest3);
+	Desalloc_AFND(aTest4);
+	Desalloc_AFND(aReunion);
+	Desalloc_AFND(aConcat);
+	Desalloc_AFND(aFermeKleene);
+	
 }
