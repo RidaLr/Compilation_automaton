@@ -25,7 +25,7 @@ typedef struct AFND{
 	etat* Q; // ensemble fini d'Ã©tat
 	int nbre_etats;
 	//etat* F; //ensemble des Ã©tats accepteurs
-	//char* Sigma; //alphabet de l'automate
+	char* Sigma; //alphabet de l'automate
 	//transition* delta; //ensemble des transitions de l'automate
 	
 }AFND;
