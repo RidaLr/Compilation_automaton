@@ -8,7 +8,7 @@
 int displayMenu()
 {
     printf("\n\n\n1 => Saisir votre propre automate (vous pourrez tester des mots sur cet automate)\n");
-    printf("2 => Utiliser un exemple existant (executer des automates existants)\n");
+    printf("2 => Utiliser un exemple existant (executer des automates prêts pour les tests)\n");
     printf("3 => Creer et afficher un automate reconnaissant le langage vide\n");
     printf("4 => Creer et afficher un automate reconnaissant le langage constitué du seul mot vide\n");
     printf("5 => Creer et afficher un automate reconnaissant un caractère passé en paramètre\n");
@@ -25,7 +25,7 @@ int displayMenu()
 void computeChoice(int choix)
 {
     AFND *afnd = NULL;
-    char *c;
+    char c;
     switch (choix)
     {
     case 1:
@@ -45,10 +45,11 @@ void computeChoice(int choix)
         Display(automate_Seul_Mot_vide());
         break;
     case 5:
-        
+
         printf("Entrez le caractère à reconaitre\n");
-        scanf(" %1s", &c);
-        Display(automate_Seul_Mot_vide(c[0]));
+        scanf(" %c", &c);
+        printf("vous avez tapé %c\n", c);
+        Display(automate_standard(c));
         break;
 
     default:
@@ -57,38 +58,64 @@ void computeChoice(int choix)
         exit(0);
         break;
     }
+    printf("Terminé, appuyer sur une touche pour afficher le sous menu\n");
+    //getchar();
 }
 AFND *constructUserDefinedAFND()
 {
-    printf("\n\nCONSTRUCTION D'UN AUTOMATE : Veuillez entrer les transitions SVP:\n\n");
+    int nbreEtat;
+    int nbreEtatEffectif = 0;
+    printf("Quel est le nombre d'états de votre automate ?\n");
+    scanf(" %d", &nbreEtat);
+    printf("\n\nCONSTRUCTION D'UN AUTOMATE : Veuillez entrer les transitions SVP:%d\n\n", nbreEtat);
     printf("SYNTAXE: [chiffre]-[caractere]-[chiffre]\n");
     printf("Exemple 1 :  5-a-1  les etats 5 et 1 seront creés ainsi qu'une transition de 5 vers 1 par 'a'\n");
     printf("Exemple 2 :  15-r-15  l'état 15 sera creé ainsi qu'une transition vers lui meme par 'r' \n\n");
+    printf("NOTE: L'état mort sera rajouté automatiquement par le programme\n");
 
-    char *input = (char *)malloc(sizeof(char) * 20);
     AFND *afnd = (AFND *)malloc(sizeof(AFND));
     afnd->nbre_etats = 0;
-    afnd->Q = (etat *)malloc(sizeof(etat) * 0);
+    afnd->Q = (etat *)malloc(sizeof(etat) * nbreEtat);
     afnd->Sigma = (char *)malloc(sizeof(char) * 0);
     afnd->taille_alphabet = 0;
     char *type = (char *)malloc(sizeof(char) * 1);
     int initialSetted = -1;
+    int endSaisieEtats = 0;
+    transitionTemps *temp = (transitionTemps *)malloc(sizeof(transitionTemps) * 0);
+    int taille = 0;
     while (1)
     {
+        if (nbreEtatEffectif == nbreEtat)
+            endSaisieEtats = 1;
+        char *input = (char *)malloc(sizeof(char) * 20);
+        printf("[ %d / %d ]", nbreEtatEffectif, nbreEtat);
         printf("Saisissez la prochaine transition (ou tapez q pour quitter) :");
         //fgets(input, 10, stdin);
-        //scanf(" %s", input);
-        fgets(input, 20, stdin);
+        scanf(" %s", input);
+        //fgets(input, 20, stdin);
         input[strcspn(input, "\n")] = 0;
         const char s[2] = "-";
         char caract;
-        int edges[3];
+        int edges[3] = {};
         char *token;
 
+        int existeS = stateAlreadyExists(*afnd, edges[0]);
+
+        int existeSNew = existeS;
+
+        etat *nouveauS = NULL;
+        etat *nouveauD = NULL;
         int validInput = 1;
         // fgets is \n terminated
         if (strlen(input) == 1 && input[0] == 'q')
-            break;
+        {
+            if (nbreEtatEffectif == nbreEtat)
+                break;
+            else
+            {
+                printf("Vous ne pouvez pas sortir sans creer tous les etats [ %d / %d]", nbreEtatEffectif, nbreEtat);
+            }
+        }
         if (strlen(input) < 4 || strlen(input) > 20)
         {
             printf("Longuer de chaine non acceptée %d\n", strlen(input));
@@ -105,7 +132,7 @@ AFND *constructUserDefinedAFND()
             while (token != NULL)
             {
                 countToks++;
-                printf(" %d %s\n", countToks, token);
+               // printf(" %d %s\n", countToks, token);
                 switch (countToks)
                 {
                 case 1:
@@ -130,121 +157,174 @@ AFND *constructUserDefinedAFND()
             if (edges[0] < 0 || edges[1] < 0)
                 validInput = 0; //No state should be nagative
         }
+        if (endSaisieEtats)
+        {
+            if (stateAlreadyExists(*afnd, edges[0]) == -1 || stateAlreadyExists(*afnd, edges[1]) == -1)
+            {
+                printf("\n\nNombre d'états atteints (%d/%d)\n", nbreEtat, nbreEtatEffectif);
+                printf("Vous ne pouvez plus creer de nouveaux etats, vous pouvez rajouter des transitions sur les etats existant\n");
+                validInput = 0;
+            }
+        }
         if (validInput)
         {
-
-            int existeS = stateAlreadyExists(*afnd, edges[0]);
-
-            int existeSNew = existeS;
-
-            etat *nouveauS = NULL;
-            etat *nouveauD = NULL;
-            if (existeS == -1)
+            //Transition existe déja ?
+            int indexS = stateAlreadyExists(*afnd, edges[0]);
+            int indexD = stateAlreadyExists(*afnd, edges[1]);
+            int go = 1;
+            if (indexS != -1 && indexD != -1)
             {
-                nouveauS = (etat *)malloc(sizeof(etat));
-                nouveauS->num = edges[0];
-                nouveauS->transitions = (transition *)malloc(sizeof(transition) * 0);
-                nouveauS->nbre_transitions = 0;
-                nouveauS->type = NON_ACCEPTEUR;
-                afnd->Q = (etat *)realloc(afnd->Q, sizeof(etat) * (afnd->nbre_etats + 1));
-                afnd->Q[afnd->nbre_etats] = *nouveauS;
-                existeSNew = afnd->nbre_etats;
-
-                printf("S num is %d\n", nouveauS->num);
-                printf("Quel est le type de %d (taper <<N>> ou <<n>> pour non accepteur ou autre chose pour accepteur)\n", edges[0]);
-                scanf(" %1s", type);
-                if (strlen(type) == 1 && toupper(type[0]) != 'N')
+                for (int l = 0; l < afnd->taille_alphabet; l++)
                 {
-                    nouveauS->type = ACCEPTEUR;
-                    printf("aaaaacpeur1 %d\n", nouveauS->num);
-                }
-                if (initialSetted == -1)
-                {
-                    printf("-------------------------------------------------\n");
-                    char isInit[20];
-                    printf("Létat %d est t-il votre etat initial ? <<N>> ou <<n>> pour non et autre chose pour oui\n", nouveauS->num);
-                    scanf(" %s", &isInit);
-                    if (strlen(isInit) > 1 || (isInit[0] != 'N' && isInit[0] != 'n'))
+                    for (int t = 0; t < temp[indexS].taille; t++)
                     {
-                        initialSetted = afnd->nbre_etats;
+                        if (temp[indexS].Tabtransition[t].c == caract && temp[existeS].Tabtransition[t].suiv->num == temp[indexD].etatId)
+                        {
+                            go = 0;
+                            printf("\n\n[Ignoré]: Cette transition existe déja \n");
+                            break;
+                        }
                     }
                 }
-                afnd->nbre_etats++;
             }
-            else
+            if (go)
             {
-                nouveauS = &(afnd->Q[existeS]);
-                existeSNew = existeS;
-            }
-            int existeD = stateAlreadyExists(*afnd, edges[1]);
-            int existeDNew = existeD;
-            if (existeD == -1)
-            {
-                nouveauD = (etat *)malloc(sizeof(etat));
-                nouveauD->num = edges[1];
-                printf("D num is %d\n", nouveauD->num);
-                nouveauD->transitions = (transition *)malloc(sizeof(transition) * 0);
-                nouveauD->nbre_transitions = 0;
-                nouveauD->type = NON_ACCEPTEUR;
 
-                printf("Quel est le type de %d (taper <<N>> ou <<n>> pour non accepteur ou autre chose pour accepteur)\n", edges[1]);
-
-                scanf(" %1s", type);
-                if (strlen(type) == 1 && toupper(type[0]) != 'N')
+                if (existeS == -1)
                 {
-                    nouveauD->type = ACCEPTEUR;
-                    printf("aaaaacpeur %d %c\n", nouveauD->num, type[0]);
-                }
-                afnd->Q = (etat *)realloc(afnd->Q, sizeof(etat) * (afnd->nbre_etats + 1));
-                afnd->Q[afnd->nbre_etats] = *nouveauD;
-                existeDNew = afnd->nbre_etats;
-                if (initialSetted == -1)
-                {
-                    char isInit[20];
-                    printf("Létat %d est t-il votre etat initial ? <<N>> ou <<n>> pour non et autre chose pour oui\n", nouveauD->num);
-                    scanf(" %s", &isInit);
-                    if (strlen(isInit) > 1 || (isInit[0] != 'N' && isInit[0] != 'n'))
+                    //nouveauS = (etat *)malloc(sizeof(etat));
+                    //nouveauS->num = edges[0];
+                    //nouveauS->transitions = (transition *)malloc(sizeof(transition) * 0);
+                    //nouveauS->nbre_transitions = 0;
+                    //nouveauS->type = NON_ACCEPTEUR;
+                    //afnd->Q = (etat *)realloc(afnd->Q, sizeof(etat) * (afnd->nbre_etats + 1));
+                    temp = (transitionTemps *)realloc(temp, sizeof(transitionTemps) * (taille + 1));
+                    taille++;
+                    nbreEtatEffectif++;
+                    //afnd->Q[afnd->nbre_etats] = *nouveauS;
+                    afnd->Q[afnd->nbre_etats].num = edges[0];
+                    afnd->Q[afnd->nbre_etats].nbre_transitions = 0;
+                    afnd->Q[afnd->nbre_etats].type = NON_ACCEPTEUR;
+                    //afnd->Q[afnd->nbre_etats].transitions = (transition *)malloc(sizeof(transition) * 0);
+                    existeSNew = afnd->nbre_etats;
+                    transitionTemps trans;
+                    trans.etatId = afnd->Q[afnd->nbre_etats].num;
+                    trans.taille = 0;
+                    temp[existeSNew] = trans;
+                    temp[existeSNew].Tabtransition = (transition *)malloc(sizeof(transition) * 0);
+                    //printf("S num is %d\n", temp[existeSNew].etatId);
+                    printf("Quel est le type de %d (taper <<N>> ou <<n>> pour non accepteur ou autre chose pour accepteur)\n", edges[0]);
+                    scanf(" %1s", type);
+                    if (strlen(type) == 1 && toupper(type[0]) != 'N')
                     {
-                        initialSetted = afnd->nbre_etats;
+                        afnd->Q[afnd->nbre_etats].type = ACCEPTEUR;
+                        //printf("aaaaacpeur1 %d\n", afnd->Q[afnd->nbre_etats].num);
                     }
-                    printf("--------------------------------------2-----------\n");
+
+                    if (initialSetted == -1)
+                    {
+                        printf("-------------------------------------------------\n");
+                        char isInit[20];
+                        printf("Létat %d est t-il votre etat initial ? <<N>> ou <<n>> pour non et autre chose pour oui\n", temp[existeSNew].etatId);
+                        scanf(" %s", &isInit);
+                        if (strlen(isInit) > 1 || (isInit[0] != 'N' && isInit[0] != 'n'))
+                        {
+                            initialSetted = afnd->nbre_etats;
+                        }
+                    }
+                    afnd->nbre_etats++;
                 }
-                afnd->nbre_etats++;
-            }
-            else
-            {
-                nouveauD = &(afnd->Q[existeD]);
-                existeDNew = existeD;
-            }
+                else
+                {
+                    nouveauS = &(afnd->Q[existeS]);
+                    existeSNew = stateAlreadyExists(*afnd, edges[0]);
+                }
+                int existeD = stateAlreadyExists(*afnd, edges[1]);
+                int existeDNew = existeD;
+                if (existeD == -1)
+                {
+                    //nouveauD = (etat *)malloc(sizeof(etat));
+                    //nouveauD->num = edges[1];
+                    // printf("D num is %d\n", nouveauD->num);
+                    //nouveauD->transitions = (transition *)malloc(sizeof(transition) * 0);
+                    //nouveauD->nbre_transitions = 0;
+                    //nouveauD->type = NON_ACCEPTEUR;
+                    afnd->Q[afnd->nbre_etats].type = NON_ACCEPTEUR;
+                    printf("Quel est le type de %d (taper <<N>> ou <<n>> pour non accepteur ou autre chose pour accepteur)\n", edges[1]);
 
-            transition trans;
-            trans.c = caract;
-            trans.suiv = &(afnd->Q[existeDNew]);
-            printf("CHPT1 %d %d\n", existeSNew, afnd->Q[existeSNew].nbre_transitions);
-            afnd->Q[existeSNew].transitions = (transition *)realloc(afnd->Q[existeSNew].transitions, sizeof(transition) * (afnd->Q[existeSNew].nbre_transitions + 1));
-            afnd->Q[existeSNew].transitions[afnd->Q[existeSNew].nbre_transitions] = trans;
+                    scanf(" %1s", type);
+                    if (strlen(type) == 1 && toupper(type[0]) != 'N')
+                    {
+                        afnd->Q[afnd->nbre_etats].type = ACCEPTEUR;
+                        //printf("aaaaacpeur %d %c\n", afnd->Q[afnd->nbre_etats].num, type[0]);
+                    }
+                    //afnd->Q = (etat *)realloc(afnd->Q, sizeof(etat) * (afnd->nbre_etats + 1));
+                    nbreEtatEffectif++;
+                    //afnd->Q[afnd->nbre_etats] = *nouveauD;
+                    int s;
+                    //afnd->Q[afnd->nbre_etats].transitions = (transition *)malloc(sizeof(transition) * 0);
+                    temp = (transitionTemps *)realloc(temp, sizeof(transitionTemps) * (taille + 1));
+                    taille++;
+                    afnd->Q[afnd->nbre_etats].num = edges[1];
+                    afnd->Q[afnd->nbre_etats].nbre_transitions = 0;
 
-            printf("Transiton1 %d %c %d\n", afnd->Q[existeSNew].num, afnd->Q[existeSNew].transitions[afnd->Q[existeSNew].nbre_transitions].c, afnd->Q[existeSNew].transitions[afnd->Q[existeSNew].nbre_transitions].suiv->num);
-            afnd->Q[existeSNew].nbre_transitions++;
+                    existeDNew = afnd->nbre_etats;
+                    transitionTemps trans;
+                    trans.etatId = afnd->Q[afnd->nbre_etats].num;
+                    trans.taille = 0;
+                    temp[existeDNew] = trans;
+                    temp[existeDNew].Tabtransition = (transition *)malloc(sizeof(transition) * 0);
+                    if (initialSetted == -1)
+                    {
+                        char isInit[20];
+                        printf("Létat %d est t-il votre etat initial ? <<N>> ou <<n>> pour non et autre chose pour oui\n", temp[existeDNew].etatId);
+                        scanf(" %s", &isInit);
+                        if (strlen(isInit) > 1 || (isInit[0] != 'N' && isInit[0] != 'n'))
+                        {
+                            initialSetted = afnd->nbre_etats;
+                        }
+                        printf("--------------------------------------2-----------\n");
+                    }
+                    afnd->nbre_etats++;
+                }
+                else
+                {
+                    nouveauD = &(afnd->Q[existeD]);
+                    existeDNew = stateAlreadyExists(*afnd, edges[1]);
+                }
+                // printf("SOURCE index zzzzzzzzzzzzzzzzzzzz = %d\n", temp[existeSNew].etatId);
+                transition trans;
+                trans.c = caract;
+                //trans.suiv = &(afnd->Q[existeDNew]);
+                //printf("CHPT1111 %d %d\n", existeSNew, afnd->Q[existeSNew].nbre_transitions);
 
-            printf("CHPT2\n");
-            if (characterAlreadyExists(*afnd, caract) == -1)
-            {
-                printf("%c existe pas encore\n", caract);
-                afnd->Sigma = (char *)realloc(afnd->Sigma, sizeof(char) * (afnd->taille_alphabet + 1));
-                afnd->Sigma[afnd->taille_alphabet] = caract;
-                afnd->taille_alphabet++;
+                temp[existeSNew].Tabtransition = (transition *)realloc(temp[existeSNew].Tabtransition, sizeof(transition) * (temp[existeSNew].taille + 1));
+                temp[existeSNew].Tabtransition[temp[existeSNew].taille] = trans;
+                temp[existeSNew].Tabtransition[temp[existeSNew].taille].suiv = &(afnd->Q[existeDNew]);
+
+                //printf("Transiton1 %d %c %d\n", temp[existeSNew].etatId, temp[existeSNew].Tabtransition[temp[existeSNew].taille].c, temp[existeSNew].Tabtransition[temp[existeSNew].taille].suiv->num);
+                //afnd->Q[existeSNew].nbre_transitions++;
+                temp[existeSNew].taille++;
+                //printf("CHPT2\n");
+                if (characterAlreadyExists(*afnd, caract) == -1)
+                {
+                    //   printf("%c existe pas encore\n", caract);
+                    afnd->Sigma = (char *)realloc(afnd->Sigma, sizeof(char) * (afnd->taille_alphabet + 1));
+                    afnd->Sigma[afnd->taille_alphabet] = caract;
+                    afnd->taille_alphabet++;
+                }
+                printf("Succès: (%d) -> [%c] -> (%d) crée.\n", temp[existeSNew].etatId, caract, temp[existeDNew].etatId);
             }
-            printf("Succès: (%d) -> [%c] -> (%d) crée.\n", nouveauS->num, caract, nouveauD->num);
         }
         else
         {
-            printf("/!\\ Erreur format non reconnu! recommencez !\n");
+            printf("\n\n/!\\ Erreur format non reconnu ou nombre d'états atteint! Appuyez sur une touche et recommencez !\n");
             getchar();
         }
 
-        printf("tapez <<q>> lorsque vous avez terminé, vous ne pouvez pas quitter sans avoir saisie au moins une transition valide:\n");
-        printf("%d etats deja\n", afnd->nbre_etats);
+        printf("tapez <<q>> lorsque vous avez terminé:\n");
+        //printf("%d etats deja\n", afnd->nbre_etats);
+        /*
         for (int i = 0; i < afnd->nbre_etats; i++)
         {
             printf("(%d)\n", afnd->Q[i].num);
@@ -263,25 +343,69 @@ AFND *constructUserDefinedAFND()
             }
             for (int j = 0; j < afnd->Q[i].nbre_transitions; j++)
             {
-                printf("trans from %d by %c to %d\n", afnd->Q[i].num, afnd->Q[i].transitions[j].c, afnd->Q[i].transitions[j].suiv->num);
+                printf("trans from %d (%p) by %c to %d p = %p s = %p\n", afnd->Q[i].num, &(afnd->Q[i]), afnd->Q[i].transitions[j].c, afnd->Q[i].transitions[j].suiv->num, afnd->Q[i].transitions[j].suiv, afnd->Q[i].transitions[j].c, afnd->Q[i].transitions[j].suiv->num, afnd->Q);
             }
-        }
+        }*/
+        /*
         for (int i = 0; i < afnd->taille_alphabet; i++)
         {
-            printf("################ %c|", afnd->Sigma[i]);
+            printf("\t####\t####\t####\t#### %c|", afnd->Sigma[i]);
         }
+        printf("nbre etats = %d\n", afnd->nbre_etats);
+
+        printf("EBN\n");*/
     }
     if (afnd->nbre_etats > 0)
     {
         if (initialSetted == -1)
         {
             afnd->s = &(afnd->Q[0]);
-            printf("Vous n'avez pas defini d'état initial, par défaut votre initial est <<%d>>", afnd->s->num);
+            printf("\n\nVous n'avez pas defini d'état initial, par défaut votre initial est <<%d>>", afnd->s->num);
             printf("AUTOMATE CREE AVEC SUCCES\n");
         }
         else
         {
             afnd->s = &(afnd->Q[initialSetted]);
+        }
+        for (int i = 0; i < taille; i++)
+        {
+            transitionTemps currentTempTrans = temp[i];
+
+            afnd->Q[currentTempTrans.etatId].transitions = (transition *)malloc(sizeof(transition) * currentTempTrans.taille);
+            for (int j = 0; j < currentTempTrans.taille; j++)
+            {
+                afnd->Q[currentTempTrans.etatId].transitions[j].c = currentTempTrans.Tabtransition[j].c;
+                afnd->Q[currentTempTrans.etatId].transitions[j].suiv = currentTempTrans.Tabtransition[j].suiv;
+                afnd->Q[currentTempTrans.etatId].nbre_transitions++;
+            }
+        }
+        int alreadyDeterministic = 1;
+        for (int i = 0; i < afnd->nbre_etats; i++)
+        {
+            //printf("CHPT 1\n");
+
+            int transitionExist = 0;
+            for (int j = 0; j < afnd->Q[i].nbre_transitions; j++)
+            {
+                //printf("CHPT 2\n");
+                char currentCaracter = afnd->Q[i].transitions[j].c;
+                for (int k = j + 1; k < afnd->Q[i].nbre_transitions; k++)
+                {
+                    //printf("CHPT 3\n");
+                    if (currentCaracter == afnd->Q[i].transitions[k].c)
+                    {
+                        //printf("CHPT 4\n");
+                        //We found two different transitions on the same caracter
+                        //printf("SAME AT %d %d for ID %d For caract %c", j, k, afnd->Q[i].num, currentCaracter);
+                        transitionExist = 1;
+                        j = afnd->Q[i].nbre_transitions;
+                        //i = afnd.nbre_etats;
+                        alreadyDeterministic = 0;
+                        //printf("CHPT 5\n");
+                        break;
+                    }
+                }
+            }
         }
     }
     else
@@ -295,7 +419,6 @@ AFND *constructUserDefinedAFND()
     printf("Taper une touche pour continuer...\n");
     getchar();
 
-    free(input);
     system("clear");
     return afnd;
 }
@@ -344,136 +467,85 @@ void tasksOnUserDefinedAFND(AFND *afnd)
     AFD *minimised = NULL;
     int *resulting_AFD_nbreEtats2 = NULL;
     AFND *afnd2 = NULL;
+    AFND *reunion = NULL;
+    AFND *concatenation = NULL;
+    AFND *fermeture = NULL;
+    char *mot = NULL;
+    char choixS[50];
     while (stayHere)
     {
         //system("clear");
 
         printf("VOTRE PROPRE AUTOMATE A ETE CREE, QUE VOULEZ VOUS FAIRE ?\n\n");
-        printf("/!\\ NOTE: Les modifications apportées dans ce menu seront persistantes sur l'automate de départ!! (déterminisation, concatenation...)\n\n");
+
         printf("1 => Afficher votre atomate\n");
         printf("2 => Creer un deuxieme automate pour faire l'union, la concatenation ou la fermeture transitive\n");
-        printf("3 => Déterminiser cet automate et l'afficher\n");
-        printf("4 => Minimiser cet automate et l'afficher\n");
-        printf("5 => Exécuter sur un mot\n");
-        printf("6 => revinir au menu principal\n");
+
+        printf("3 => Fermeture transitive et affichage (Modification persistante)\n");
+        printf("4 => revinir au menu principal\n");
         int choix = 0;
         do
         {
             printf("Entrez votre choix:");
             scanf(" %d", &choix);
-        } while (choix < 1 || choix > 6);
+        } while (choix < 1 || choix > 7);
         switch (choix)
         {
         case 1:
             Display(afnd);
             break;
         case 2:
-            if (doneSubMenu3 != 1)
+            afnd2 = constructUserDefinedAFND();
+            if (afnd2 != NULL)
             {
-                afnd2 = constructUserDefinedAFND();
-                printf("LE deuxieme AFND a été crée, que voulez vous faire ?\n");
-                printf("1 => Réunion et affichage\n");
-                printf("2 => Concatenation et affichage\n");
-                printf("3 => Fermeture transitive et affichage\n");
-                char *choix2;
                 do
                 {
-                    printf("Entrez votre choix:");
-                    scanf(" %1s", &choix2);
-                } while (atoi(choix2) < 0 || atoi(choix2) > 3);
-                switch (atoi(choix2))
-                {
-                case 1:
-                    //AFND *reunion = reunion_automate(afnd, afnd2);
-                    //Display(reunion);
-                    break;
-                case 2:
+                    printf("LE deuxieme AFND a été crée, que voulez vous faire ?\n\n");
+                    printf("1 => Réunion et affichage \n");
+                    printf("2 => Concatenation et affichage\n");
 
-                    //AFND *reunion = concatenation_automate(afnd, afnd2);
-                    //Display(reunion);
-                    break;
-                default:
+                    printf("/!\\ NOTE: Les modifications apportées dans ce menu seront persistantes sur l'automate 1 de départ!! (déterminisation, concatenation...)\n\n");
+                    char *choix2 = (char *)malloc(sizeof(char));
+                    do
+                    {
+                        printf("Entrez votre choix:");
+                        scanf(" %1s", choix2);
+                    } while (atoi(choix2) < 0 || atoi(choix2) > 2);
+                    switch (atoi(choix2))
+                    {
+                    case 1:
 
-                    //AFND *reunion = farmeture_automate(afnd, afnd2);
-                    //Display(reunion);
+                        reunion = reunion_automate(afnd, afnd2);
+                        Display(reunion);
+                        break;
+                    default:
+
+                        concatenation = concatenation_automate(afnd, afnd2);
+                        Display(concatenation);
+                        break;
+                    }
+
                     break;
-                }
-            }else
-            {
-                printf("Vous devez revenir au menu principal est saisir une nouvel AFND, car vous avez déja transformé le premier automate en AFD, \nvous ne pouvez donc plus faire ces 3 actions\n");
+                } while (choixS[0] != 'q');
             }
-            
+            else
+            {
+                printf("Le deuxième automate n'a pas encore été crée.");
+            }
             break;
         case 3:
-            doneSubMenu3 = 1;
-            resulting_AFD_nbreEtats2 = (int *)malloc(sizeof(int));
-            if (alreadyDeterministic(*afnd) == 1)
-            {
-                printf("Already deterministic\n");
-                afdTestFrom_AFND2 = AFND_to_AFD_recopie(*afnd);
-            }
-            else
-            {
-                printf("Not yet deterministic\n");
-                newStatesMAtrix2 = createNewStatesMAtrix((*afnd2), resulting_AFD_nbreEtats2);
-                afdTestFrom_AFND2 = create_AFD_fromStateMatrix(newStatesMAtrix2, (*afnd2), *resulting_AFD_nbreEtats2);
-            }
-            printf("SUCCES: L'automate a  été déterminisé.\n appuyer sur une touche pour l'afficher\n");
-            getchar();
-            displayDeterministic_AFD(*afdTestFrom_AFND2);
-            printf("Retour au menu, NOTE: Cette modification de l'automate est persistante sur l'automate initial\n");
-            break;
-        case 4:
 
-            if (doneSubMenu3 == 1)
-            {
-                doneSubMenu4 = 1;
-                printf("Vérification...\n");
-                printf("BRAVO: votre automate était déja déterministe !...\n");
-                printf("Appuyer sur une touche pour afficher l'automate minimisé.\n");
-                getchar();
-                addDeathState(afdTestFrom_AFND2);
-                minimised = constructBilan_AFD(*afdTestFrom_AFND2);
-                removeDeathState(minimised);
-                displayDeterministic_AFD(*minimised);
-                printf("Minimisation et affichage terminée, \n");
-            }
-            else
-            {
-                printf("NOTE: tapez d'abord le (3) pour déterminiser avant de minimiser\n");
-                printf("Appuyer sur une touche pour revenir au sous menu...\n");
-                getchar();
-            }
-
-            break;
-        case 5:
-            if (doneSubMenu4 == 1)
-            {
-                char *mot = (char *)malloc(sizeof(char) * 100);
-                do
-                {
-
-                    printf("Taper un mot exécuter sur l'automate\n");
-                    scanf(" %s", mot);
-                    executeDeterministicOnWord(mot, minimised);
-                    printf("Taper <<q>> pour revenir au sous menu\n");
-                } while (mot[0] != 'q');
-                free(mot);
-            }
-            else
-            {
-                printf("NOTE: tapez d'abord le (3) pour déterminiser et (4) pour minimiser avant d'exécuter sur un mot\n");
-                printf("Appuyer sur une touche pour revenir au sous menu...\n");
-                getchar();
-            }
-
+            fermeture = farmeture_automate(afnd);
+            Display(fermeture);
+            printf("NB: (Cette modification est persistante sur l'automate de départ)\n");
             break;
         default:
             printf("NOTE: Si vous revenez au menu principal, toutes vos actions dans ce menu seront perdues ainsi que les automates que vous avez saisies!!\n");
             printf("Sortir quand meme? taper <<1>> pour sortir et <<0>>  pour rester dans le sous menu actuel\n");
             char *choice = (char *)malloc(sizeof(char) * 100);
             scanf(" %1s", choice);
-            if (atoi(choice) == 1){
+            if (atoi(choice) == 1)
+            {
                 stayHere = 0;
                 system("clear");
             }
@@ -486,28 +558,62 @@ void tasksOnUserDefinedAFND(AFND *afnd)
 }
 void exucuteBuildInSamples()
 {
-    /*
-	AFND *automate = automate_Seul_Mot_vide();
-	Display(automate);
+    char buff[50];
+    printf("\t####Appuyer sur une touche et valider pour afficher un automate reconnaissant le langage vide\n");
+    scanf(" %s", buff);
+    AFND *automate2 = automate_vide();
+    Display(automate2);
 
-	AFND *automate2 = automate_vide();
-	Display(automate2);
+    printf("\t####Appuyer sur une touche et valider pour afficher un automate reconnaisant le mot vide\n");
+    scanf(" %s", buff);
+    AFND *automate = automate_Seul_Mot_vide();
+    Display(automate);
 
-	AFND *automateTest = automateTestPlein();
-	Display(automateTest);
-	*/
+    printf("\t####Appuyer sur une touche et valider pour générer un AUTOMATE NON DETERMINISTE\n");
+    scanf(" %s", buff);
+    system("clear");
+    AFND *automateTest = automateTestPlein();
+    Display(automateTest);
+    printf("\n\n Nous allons utiliser l'automate (AFND) ci dessus pour le test  (FIG.1 du TD N°3)");
+    printf("\t####Appuyer sur une touche pour déterminiser cet automate\n");
+    scanf(" %s", buff);
+
+    int *resulting_AFD_nbreEtats = (int *)malloc(sizeof(int));
+    concatenated_etat **newStatesMAtrix = createNewStatesMAtrix((*automateTest), resulting_AFD_nbreEtats);
+    AFD *afdTestFrom_AFND = create_AFD_fromStateMatrix(newStatesMAtrix, (*automateTest), *resulting_AFD_nbreEtats);
+    displayDeterministic_AFD(*afdTestFrom_AFND);
+    printf("L'automate AFD résulat est ci dessus\n");
+
+    printf("\n\n\n\t####Appuyer sur une touche pour Minimiser cet automate\n");
+    scanf(" %s", buff);
+
+    addDeathState(afdTestFrom_AFND);
+    AFD *minimised = constructBilan_AFD(*afdTestFrom_AFND);
+
+    //displayDeterministic_AFD(*afdTestFrom_AFND);
+    //AFD *minimised = constructBilan_AFD(*afdTestFrom_AFND);
+    printf("minimised\n");
+    //displayDeterministic_AFD(*minimised);
+    removeDeathState(minimised);
+    displayDeterministic_AFD(*minimised);
+    printf("L'automate AFD minimisé résulat est ci dessus\n");
+
+    printf("\n\n\n\t####Appuyer sur une touche pour Executer des mots de test sur cet automate minimisé\n");
+    scanf(" %s", buff);
+
+    char word[50];
+    do
+    {
+        printf("Entrer un mot à exécuter: (<<q>> pour quitter)\n");
+        scanf(" %s", word);
+        executeDeterministicOnWord(word, minimised);
+
+    } while (word[0] != 'q');
+    printf("Merci d'avoir Testé ce programme, validez une touche pour revenir au menu\n");
+    scanf(" %s", buff);
+    destroyAFD(minimised);
+    destroyAFD(afdTestFrom_AFND);
     /*
-	piked ** matrix = afndToMatrix(*automateTest);
-	int *msize = malloc(sizeof(int));
-	char **a = computeNewEdgesFromMatrix(*automateTest, matrix, msize)
-	*/
-    /*
-	int *resulting_AFD_nbreEtats = (int *)malloc(sizeof(int));
-	concatenated_etat **newStatesMAtrix = createNewStatesMAtrix((*automateTest), resulting_AFD_nbreEtats);
-	AFD * afdTestFrom_AFND = create_AFD_fromStateMatrix(newStatesMAtrix, (*automateTest), *resulting_AFD_nbreEtats);
-	displayDeterministic_AFD(*afdTestFrom_AFND);
-	int **res = constructBilan_AFD(*afdTestFrom_AFND);
-	*/
     AFND *afnd2 = automateTestPlein2();
     Display(afnd2);
 
@@ -542,15 +648,5 @@ void exucuteBuildInSamples()
     displayDeterministic_AFD(*minimised);
     removeDeathState(minimised);
     displayDeterministic_AFD(*minimised);
-
-    char *word1 = (char *)malloc(sizeof(char) * 6);
-    word1[0] = 'a';
-    word1[1] = 'a';
-    word1[2] = 'a';
-    word1[3] = 'a';
-    word1[4] = 'a';
-    word1[5] = 'b';
-    executeDeterministicOnWord(word1, minimised);
-    destroyAFD(minimised);
-    destroyAFD(afdTestFrom_AFND2);
+*/
 }

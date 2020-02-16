@@ -41,7 +41,7 @@ void executeDeterministicOnWord(char *word, AFD *afd)
             //We reached a state where the word has not been read entirely and the is no valid transition
             if (foundValidTransition == 0)
             {
-                printf("no by %c on ID %d val %d\n", word[currentIndex], currentEtat->num, currentEtat->concatenatedNums[0]);
+                //printf("no by %c on ID %d val %d\n", word[currentIndex], currentEtat->num, currentEtat->concatenatedNums[0]);
                 break;
             }
 
@@ -72,7 +72,7 @@ int *canGoTo(AFND afnd, int sourceId, int *resultSize, char caract)
             {
                 if (currentEtat.transitions[j].c == caract)
                 {
-                    //printf("from %d to %d nbTRans = %d\n", sourceId, currentEtat.transitions[j].suiv->num, currentEtat.nbre_transitions);
+                    ////printf("from %d to %d nbTRans = %d\n", sourceId, currentEtat.transitions[j].suiv->num, currentEtat.nbre_transitions);
                     result = (int *)realloc(result, sizeof(int) * (rSize + 1));
                     result[rSize] = currentEtat.transitions[j].suiv->num;
                     rSize++;
@@ -92,6 +92,7 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
         printf("exiting...\n");
         exit(0);
     }
+    ////printf("Inside\n");
     int lastDataTakenIndex = 0;
     int newEdgesSize = 1;
     int nexNum = afnd.s->num;
@@ -116,7 +117,7 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
         {
             int finalResultSize = 0;
             int *finalResult = (int *)malloc(sizeof(int) * 0);
-            //printf("currentOldstate is %d and numSize is %d\n", currentOldState->num, currentOldState->concatenatedNumSize);
+            ////printf("currentOldstate is %d and numSize is %d\n", currentOldState->num, currentOldState->concatenatedNumSize);
 
             char currentChar = afnd.Sigma[l];
 
@@ -131,16 +132,16 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
                     finalResultSize++;
                 }
             }
-            //printf("currentChar is %c and cangotosize is %d\n", currentChar, finalResultSize);
+            /*//printf("currentChar is %c and cangotosize is %d\n", currentChar, finalResultSize);
 
-            //printf("[CGT() rSize is %d]\n", finalResultSize);
-            //printf("++++++de letat %d  par %c on arrive à:", currentOldState->num, currentChar);
-            /*
+            ////printf("[CGT() rSize is %d]\n", finalResultSize);
+            ////printf("++++++de letat %d  par %c on arrive à:", currentOldState->num, currentChar);
+
             for (int p = 0; p < finalResultSize; p++)
             {
-                printf("%d", finalResult[p]);
+                //printf("%d", finalResult[p]);
             }
-            printf("\n");
+            //printf("\n");
             */
             //stateThroughtCaract[currentChar][currentOldState->num] = finalResult;
 
@@ -180,7 +181,7 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
             }
             if (alreadyExist == 1)
             {
-                //printf("State num %d already exists at index %d\n", oldStateMAtrix[existeIndex]->num, existeIndex);
+                ////printf("State num %d already exists at index %d\n", oldStateMAtrix[existeIndex]->num, existeIndex);
 
                 AFD_transition trans;
                 trans.c = currentChar;
@@ -192,7 +193,7 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
             }
             else
             {
-                //printf("state does not exists\n");
+               // //printf("state does not exists\n");
                 concatenated_etat *nouveau = (concatenated_etat *)malloc(sizeof(concatenated_etat));
                 nouveau->num = nexNum;
                 nouveau->type = NON_ACCEPTEUR;
@@ -212,7 +213,7 @@ concatenated_etat **createNewStatesMAtrix(AFND afnd, int *resulting_AFD_nbreEtat
                         nouveau->type = ACCEPTEUR;
                     }
                 }
-                //printf("Nouveau num is %d\n", nouveau->num);
+                ////printf("Nouveau num is %d\n", nouveau->num);
                 oldStateMAtrix = (concatenated_etat **)realloc(oldStateMAtrix, sizeof(concatenated_etat *) * (newEdgesSize + 1));
                 oldStateMAtrix[newEdgesSize] = nouveau;
 
@@ -268,10 +269,10 @@ AFD *constructBilan_AFD(AFD afd)
         for (int j = 0; j < afd.taille_alphabet; j++)
         {
             char currentChar = afd.Sigma[j];
-            //printf("CHPT %c lm\n", currentChar);
+            ////printf("CHPT %c lm\n", currentChar);
             if (i == 0)
                 deterministicMatrix[currentChar] = (int *)malloc(sizeof(int) * afd.nbre_etats);
-            // printf("CHPT 2\n");
+            // //printf("CHPT 2\n");
             if (currentEtat.type == ACCEPTEUR)
             {
                 tabInit[currentEtat.num] = 0;
@@ -300,15 +301,15 @@ AFD *constructBilan_AFD(AFD afd)
         }
     }
 
-    printf("ffffffffffffffffffffffffffffffffffffff\n");
+    /*//printf("ffffffffffffffffffffffffffffffffffffff\n");
     for (int i = 0; i < afd.nbre_etats; i++)
     {
         for (int j = 0; j < afd.taille_alphabet; j++)
         {
 
-            printf("[%c][%d] = %d\n", afd.Sigma[j], afd.Q[i].num, deterministicMatrix[afd.Sigma[j]][afd.Q[i].num]);
+            //printf("[%c][%d] = %d\n", afd.Sigma[j], afd.Q[i].num, deterministicMatrix[afd.Sigma[j]][afd.Q[i].num]);
         }
-    }
+    }*/
     constructBilan(deterministicMatrix, afd, tabInit, tabBilan, lastTypeNum, tabTypes);
 
     AFD *minimised = constructMinisedAFD_from_bilan(deterministicMatrix, afd, tabBilan);
@@ -329,18 +330,18 @@ void constructBilan(int **deterministicMatrix, AFD afd, int *tabInit, int *tabBi
 {
 
     int lastNum = *lastTypeNum;
-    for (int j = 0; j < afd.nbre_etats; j++)
+    /*for (int j = 0; j < afd.nbre_etats; j++)
     {
-        printf("TYPE[%d] = %d\n", afd.Q[j].num, tabTypes[afd.Q[j].num]);
-    }
+        //printf("TYPE[%d] = %d\n", afd.Q[j].num, tabTypes[afd.Q[j].num]);
+    }*/
     int finished = 0;
     do
     {
         for (int i = 0; i < afd.nbre_etats; i++)
         {
             concatenated_etat currentEtat = afd.Q[i];
-            printf("++++++++++++curenntEtat is %d\n", currentEtat.num);
-            printf("lllllllllllll = %d\n", lastNum);
+            /*//printf("++++++++++++curenntEtat is %d\n", currentEtat.num);
+            //printf("lllllllllllll = %d\n", lastNum);*/
             for (int j = 0; j < afd.nbre_etats; j++)
             {
                 concatenated_etat currentEtatAux = afd.Q[j];
@@ -373,9 +374,9 @@ void constructBilan(int **deterministicMatrix, AFD afd, int *tabInit, int *tabBi
                             }
                             if (found == 1 && tabInit[currentEtatAux.num] == tabInit[afd.Q[k].num])
                             {
-                                printf("conf\n");
-                                printf("tabTYpes[%d] = %d f %d\n", currentEtatAux.num, tabTypes[afd.Q[k].num], afd.Q[k].num);
-                                printf("tabBilan[%d] = %d\n", currentEtatAux.num, tabTypes[afd.Q[k].num]);
+                               /* //printf("conf\n");
+                                //printf("tabTYpes[%d] = %d f %d\n", currentEtatAux.num, tabTypes[afd.Q[k].num], afd.Q[k].num);
+                                //printf("tabBilan[%d] = %d\n", currentEtatAux.num, tabTypes[afd.Q[k].num]);*/
                                 tabTypes[currentEtatAux.num] = tabTypes[afd.Q[k].num];
                                 tabBilan[currentEtatAux.num] = tabBilan[afd.Q[k].num];
 
@@ -397,54 +398,55 @@ void constructBilan(int **deterministicMatrix, AFD afd, int *tabInit, int *tabBi
                             }
                             if (dejaModifie == 0)
                             {
-                                printf("config of %d not found max = %d\n", currentEtatAux.num, lastNum);
-                                printf("tabTYpes[%d] = %d\n", currentEtatAux.num, lastNum + 1);
-                                printf("tabBilan[%d] = %d\n", currentEtatAux.num, lastNum + 1);
+                              /*  //printf("config of %d not found max = %d\n", currentEtatAux.num, lastNum);
+                                //printf("tabTYpes[%d] = %d\n", currentEtatAux.num, lastNum + 1);
+                                //printf("tabBilan[%d] = %d\n", currentEtatAux.num, lastNum + 1);*/
                                 tabTypes[currentEtatAux.num] = lastNum + 1;
                                 tabBilan[currentEtatAux.num] = lastNum + 1;
                                 lastNum++;
-                                printf("llllllllllllllllllllllllllnew = %d\n", lastNum);
+                                ////printf("llllllllllllllllllllllllllnew = %d\n", lastNum);
                             }
                         }
                     }
                     else
                     {
-                        printf("config of %d nthing\n", currentEtatAux.num);
-                        printf("tabBilan[%d] = %d\n", currentEtatAux.num, tabInit[currentEtat.num]);
+                       /* //printf("config of %d nthing\n", currentEtatAux.num);
+                        //printf("tabBilan[%d] = %d\n", currentEtatAux.num, tabInit[currentEtat.num]);*/
                         tabBilan[currentEtatAux.num] = tabInit[currentEtat.num];
                     }
                 }
-                printf("CHTPT!\n");
+               // //printf("CHTPT!\n");
             }
-            printf("INIT is\n");
+            ////printf("INIT is\n");
+            /*
             for (int i = 0; i < afd.nbre_etats; i++)
             {
-                printf("INIT[%d] = %d\n", afd.Q[i].num, tabInit[afd.Q[i].num]);
+                //printf("INIT[%d] = %d\n", afd.Q[i].num, tabInit[afd.Q[i].num]);
             }
 
-            printf("BIL is\n");
+            //printf("BIL is\n");
             for (int i = 0; i < afd.nbre_etats; i++)
             {
-                printf("BIL[%d] = %d\n", afd.Q[i].num, tabBilan[afd.Q[i].num]);
+                //printf("BIL[%d] = %d\n", afd.Q[i].num, tabBilan[afd.Q[i].num]);
             }
 
-            printf("TYPES is\n");
+            //printf("TYPES is\n");
             for (int i = 0; i < afd.nbre_etats; i++)
             {
-                printf("TYPE[%d] = %d\n", afd.Q[i].num, tabTypes[afd.Q[i].num]);
-            }
+                //printf("TYPE[%d] = %d\n", afd.Q[i].num, tabTypes[afd.Q[i].num]);
+            }*/
         }
 
         updateDeterministicMatrix(tabBilan, deterministicMatrix, afd);
-        for (int i = 0; i < afd.nbre_etats; i++)
+        /*for (int i = 0; i < afd.nbre_etats; i++)
         {
             concatenated_etat currentEtat = afd.Q[i];
             for (int j = 0; j < afd.taille_alphabet; j++)
             {
                 char currnetChar = afd.Sigma[j];
-                printf("det[%c][%d] = %d\n", currnetChar, currentEtat.num, deterministicMatrix[currnetChar][currentEtat.num]);
+                //printf("det[%c][%d] = %d\n", currnetChar, currentEtat.num, deterministicMatrix[currnetChar][currentEtat.num]);
             }
-        }
+        }*/
 
         finished = bilanEqualsInit(tabInit, tabBilan, afd.nbre_etats);
         //update init
@@ -486,17 +488,17 @@ AFD *constructMinisedAFD_from_bilan(int **deterministicMatrix, AFD unMinimisedAF
 
     afd->taille_alphabet = unMinimisedAFD.taille_alphabet;
     afd->nbre_etats = 0;
-    int tailleEtatts = 0;
-    int lastNum = 0;
+    //int tailleEtatts = 0;
+    //int lastNum = 0;
     afd->Q = (concatenated_etat *)malloc(sizeof(concatenated_etat) * newSize);
     for (int i = 0; i < unMinimisedAFD.nbre_etats; i++)
     {
         concatenated_etat currentEtat = unMinimisedAFD.Q[i];
         if (createdStates[tabBilan[currentEtat.num]] == 0)
         {
-            printf("creating %d n %d\n", currentEtat.num, tabBilan[currentEtat.num]);
-            printf("fqsfsfqsf %d\n", deterministicMatrix['a'][0]);
-            printf("fqsfsfqsf %d\n", deterministicMatrix['a'][0]);
+            /*//printf("creating %d n %d\n", currentEtat.num, tabBilan[currentEtat.num]);
+            //printf("fqsfsfqsf %d\n", deterministicMatrix['a'][0]);
+            //printf("fqsfsfqsf %d\n", deterministicMatrix['a'][0]);*/
             concatenated_etat *nouveau = (concatenated_etat *)malloc(sizeof(concatenated_etat));
             nouveau->type = currentEtat.type;
             nouveau->num = tabBilan[currentEtat.num];
@@ -525,7 +527,8 @@ AFD *constructMinisedAFD_from_bilan(int **deterministicMatrix, AFD unMinimisedAF
         }
     }
     //sleep(15);
-    printf("fqsfsfqsf\n");
+    ////printf("fqsfsfqsf\n");
+    /*
     for (int i = 0; i < unMinimisedAFD.nbre_etats; i++)
     {
         concatenated_etat currentEtat = unMinimisedAFD.Q[i];
@@ -533,12 +536,12 @@ AFD *constructMinisedAFD_from_bilan(int **deterministicMatrix, AFD unMinimisedAF
         {
             char currentChar = unMinimisedAFD.Sigma[j];
             //find suiv by this char
-            printf("CHPTAbis %d %c = %d\n", currentEtat.num, currentChar, deterministicMatrix[currentChar][currentEtat.concatenatedNums[0]]);
+           // //printf("CHPTAbis %d %c = %d\n", currentEtat.num, currentChar, deterministicMatrix[currentChar][currentEtat.concatenatedNums[0]]);
             int numToFind = deterministicMatrix[currentChar][currentEtat.concatenatedNums[0]];
-            printf("CHPTA\n");
+            ////printf("CHPTA\n");
         }
-    }
-    printf("dddddddddddddd\n");
+    }*/
+    ////printf("dddddddddddddd\n");
     //Creation des transitions
     for (int i = 0; i < afd->nbre_etats; i++)
     {
@@ -547,21 +550,21 @@ AFD *constructMinisedAFD_from_bilan(int **deterministicMatrix, AFD unMinimisedAF
         {
             char currentChar = unMinimisedAFD.Sigma[j];
             //find suiv by this char
-            printf("jjjjjjjjjjjjjjjjjjjjjjjjjjjjj%d\n", currentEtat->concatenatedNums[0]);
-            printf("CHPTA %d %c %d\n", currentEtat->num, currentChar, deterministicMatrix[currentChar][currentEtat->concatenatedNums[0]]);
+            ////printf("jjjjjjjjjjjjjjjjjjjjjjjjjjjjj%d\n", currentEtat->concatenatedNums[0]);
+            ////printf("CHPTA %d %c %d\n", currentEtat->num, currentChar, deterministicMatrix[currentChar][currentEtat->concatenatedNums[0]]);
             int numToFind = deterministicMatrix[currentChar][currentEtat->concatenatedNums[0]];
-            printf("++++++chercher %d\n", numToFind);
+           // //printf("++++++chercher %d\n", numToFind);
             for (int k = 0; k < afd->nbre_etats; k++)
             {
                 if (afd->Q[k].num == numToFind)
-                { //printf("CHPTB\n");
+                { ////printf("CHPTB\n");
                     AFD_transition trans;
                     trans.c = currentChar;
                     trans.suiv = &(afd->Q[k]);
-                    printf(" suiv de %d par %c =  %d \n", currentEtat->concatenatedNums[0], trans.c, afd->Q[k].num, afd->Q[k].num);
+                   // //printf(" suiv de %d par %c =  %d \n", currentEtat->concatenatedNums[0], trans.c, afd->Q[k].num, afd->Q[k].num);
 
                     currentEtat->transitions = (AFD_transition *)realloc(currentEtat->transitions, sizeof(AFD_transition) * (currentEtat->nbre_transitions + 1));
-                    printf("aaab\n");
+                    ////printf("aaab\n");
                     currentEtat->transitions[currentEtat->nbre_transitions] = trans;
                     currentEtat->nbre_transitions++;
                     break;
@@ -618,7 +621,7 @@ AFD *AFND_to_AFD_recopie(AFND afnd)
         for (int j = 0; j < currentAFND_etat.nbre_transitions; j++)
         {
             currentAFD_etat->transitions[j].c = currentAFND_etat.transitions[j].c;
-            printf("CHPT11111\n");
+            ////printf("CHPT11111\n");
             currentAFD_etat->transitions[j].suiv = &(afd->Q[currentAFND_etat.transitions[j].suiv->num]);
         }
     }
@@ -627,7 +630,7 @@ AFD *AFND_to_AFD_recopie(AFND afnd)
         afd->Sigma[i] = afnd.Sigma[i];
     }
 
-    printf("CHPT11111\n");
+    ////printf("CHPT11111\n");
     afd->s = &(afd->Q[0]);
     return afd;
 }
@@ -676,15 +679,16 @@ void addDeathState(AFD *afd)
             {
                 if (currentEtat->transitions[k].c == caract)
                 {
-                    printf("char %c f on %d\n", caract, currentEtat->num);
+                    //printf("char %c f on %d\n", caract, currentEtat->num);
                     found = 1;
                     break;
                 }
-                else
-                    printf("char %c nf on %d\n", caract, currentEtat->num);
+                //else
+                    //printf("char %c nf on %d\n", caract, currentEtat->num);
             }
             if (found == 0)
             {
+                ///printf("DONE\n");
                 AFD_transition trans;
                 trans.c = caract;
                 trans.suiv = mort;
@@ -696,9 +700,7 @@ void addDeathState(AFD *afd)
             }
         }
     }
-    if (created == 0)
-        free(mort);
-    else
+    if (created != 0)
     {
         //etat mort
         afd->Q = (concatenated_etat *)realloc(afd->Q, sizeof(concatenated_etat) * (afd->nbre_etats + 1));
@@ -844,25 +846,30 @@ AFND *automateTestPlein2()
 
 int alreadyDeterministic(AFND afnd)
 {
+
     int alreadyDeterministic = 1;
     for (int i = 0; i < afnd.nbre_etats; i++)
     {
+        //printf("CHPT 1\n");
 
-        int transitionExist = 0;
+        //int transitionExist = 0;
         for (int j = 0; j < afnd.Q[i].nbre_transitions; j++)
         {
+            //printf("CHPT 2\n");
             char currentCaracter = afnd.Q[i].transitions[j].c;
             for (int k = j + 1; k < afnd.Q[i].nbre_transitions; k++)
             {
-
+                //printf("CHPT 3\n");
                 if (currentCaracter == afnd.Q[i].transitions[k].c)
                 {
+                    //printf("CHPT 4\n");
                     //We found two different transitions on the same caracter
-                    printf("SAME AT %d %d for ID %d For caract %c", j, k, afnd.Q[i].num, currentCaracter);
-                    transitionExist = 1;
+                    //printf("SAME AT %d %d for ID %d For caract %c", j, k, afnd.Q[i].num, currentCaracter);
+                    //transitionExist = 1;
                     j = afnd.Q[i].nbre_transitions;
-                    i = afnd.nbre_etats;
+                    //i = afnd.nbre_etats;
                     alreadyDeterministic = 0;
+                    //printf("CHPT 5\n");
                     break;
                 }
             }
@@ -895,11 +902,11 @@ void removeDeathState(AFD *afd)
                                 currentEtatAux->transitions[m].suiv = NULL;
                                 currentEtatAux->transitions[m].c = ' ';
                                 reduceNbre++;
-                                printf("%d was poin on %d\n", currentEtatAux->concatenatedNums[0], currentEtat->concatenatedNums[0]);
+                                //printf("%d was poin on %d\n", currentEtatAux->concatenatedNums[0], currentEtat->concatenatedNums[0]);
                             }
                         }
                         currentEtatAux->nbre_transitions -= reduceNbre;
-                        printf("count is %d %d\n", currentEtatAux->nbre_transitions, reduceNbre);
+                        //printf("count is %d %d\n", currentEtatAux->nbre_transitions, reduceNbre);
 
                         currentEtatAux->transitions = (AFD_transition *)realloc(currentEtatAux->transitions, sizeof(AFD_transition) * currentEtatAux->nbre_transitions);
                     }

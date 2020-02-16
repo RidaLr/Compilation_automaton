@@ -60,5 +60,12 @@ typedef struct AFD{
 	//transition* delta;
 	
 }AFD;
+typedef struct transitionTemps
+{
+	int etatId;
+	transition *Tabtransition;
+	int taille;
+}transitionTemps;
+
 
 #endif
