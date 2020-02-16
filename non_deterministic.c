@@ -106,14 +106,80 @@ AFND *automate_standard(char c)
 AFND *reunion_automate(AFND* automate1, AFND* automate2)
 {
 	
-	if( 1 == 0)
+	if( automate1->nbre_etats < 1)
+		return automate2;
+	if( automate2->nbre_etats < 1)
+		return automate1;
+	
+	if(automate1->nbre_etats == 1){
+		if(automate2->nbre_etats ==1 ){
+			if(automate2->s->type == ACCEPTEUR || automate1->s->type == ACCEPTEUR){
+				automate1->s->type = ACCEPTEUR;
+			}
+			for (int i = 0; i < automate2->s->nbre_transitions; i++)
+			{
+				int go=1;
+				for (int j = 0; j < automate1->s->nbre_transitions; j++)
+				{
+					if(automate1->s->transitions[j].c == automate2->s->transitions[i].c)
+					go = 0;
+				}
+				if(go){
+				automate1->s->transitions = (transition*)realloc(automate1->s->transitions, sizeof(transition) * (automate1->s->nbre_transitions +1));
+				automate1->s->transitions[automate1->s->nbre_transitions] = automate2->s->transitions[i];
+				automate1->s->nbre_transitions ++;
+				}
+			}
+			
+			return automate1;
+		}else
+		{
+			if(automate2->s->type == ACCEPTEUR || automate1->s->type == ACCEPTEUR){
+				automate2->s->type = ACCEPTEUR;
+			}
+			for (int i = 0; i < automate1->s->nbre_transitions; i++)
+			{
+				int go=1;
+				for (int j = 0; j < automate2->s->nbre_transitions; j++)
+				{
+					if(automate2->s->transitions[j].c == automate1->s->transitions[i].c)
+					go = 0;
+				}
+				if(go){
+				automate2->s->transitions = (transition*)realloc(automate2->s->transitions, sizeof(transition) * (automate2->s->nbre_transitions +1));
+				automate2->s->transitions[automate2->s->nbre_transitions] = automate1->s->transitions[i];
+				automate2->s->nbre_transitions ++;
+				}
+				
+			}
+			return automate2;
+		}
+		
+	}else
 	{
-		
-		/*CODE*/
-		
+		if(automate2->nbre_etats ==1 ){
+			if(automate2->s->type == ACCEPTEUR || automate1->s->type == ACCEPTEUR){
+				automate1->s->type = ACCEPTEUR;
+			}
+			for (int i = 0; i < automate2->s->nbre_transitions; i++)
+			{
+				int go=1;
+				for (int j = 0; j < automate1->s->nbre_transitions; j++)
+				{
+					if(automate1->s->transitions[j].c == automate2->s->transitions[i].c)
+					go = 0;
+				}
+				if(go){
+				automate1->s->transitions = (transition*)realloc(automate1->s->transitions, sizeof(transition) * (automate1->s->nbre_transitions +1));
+				automate1->s->transitions[automate1->s->nbre_transitions] = automate2->s->transitions[i];
+				automate1->s->nbre_transitions ++;
+				}
+			}
+			return automate1;
+		}
 	}
-	else
-	{
+	
+	
 		//Change all nums of the first automaton to avoid conflict between  nums
 		int nextNum = 0;
 		for(int i=1; i < automate2->nbre_etats; i++)
@@ -166,7 +232,7 @@ AFND *reunion_automate(AFND* automate1, AFND* automate2)
 				automate1->Q[0] = *automate1->s; 
 			}
 		}	
-	}
+	
 	
 	int oldNumber = automate1->nbre_etats;
 	automate1->nbre_etats += automate2->nbre_etats -1;
@@ -185,13 +251,23 @@ AFND *reunion_automate(AFND* automate1, AFND* automate2)
  *la concaténation de leurs langages*/
 AFND *concatenation_automate(AFND *automate1, AFND *automate2)
 {
-	
-	if( 1 == 0)
-	{
-		
-		/*CODE*/
-		
+	if(	automate1->nbre_etats < 1)
+	return automate2;
+	if(automate2->nbre_etats < 1)
+	return automate1;
+	if( automate1->nbre_etats < 2){
+		if(automate1->s->type == ACCEPTEUR){
+			automate2->s->type = ACCEPTEUR;
+		}
+		return automate2;
 	}
+	if( automate2->nbre_etats < 2){
+		if(automate2->s->type == ACCEPTEUR){
+			automate1->s->type = ACCEPTEUR;
+		}
+		return automate1;
+	}
+
 	else
 	{
 		//Change all nums of the first automaton to avoid conflict between  nums

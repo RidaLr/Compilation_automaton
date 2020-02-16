@@ -483,7 +483,7 @@ void tasksOnUserDefinedAFND(AFND *afnd)
         printf("VOTRE PROPRE AUTOMATE A ETE CREE, QUE VOULEZ VOUS FAIRE ?\n\n");
 
         printf("1 => Afficher votre atomate\n");
-        printf("2 => Creer un deuxieme automate pour faire l'union, la concatenation ou la fermeture transitive\n");
+        printf("2 => Creer un deuxieme automate pour faire l'union ou la concatenation\n");
 
         printf("3 => Fermeture transitive et affichage (Modification persistante)\n");
         printf("4 => revinir au menu principal\n");
