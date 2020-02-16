@@ -319,34 +319,61 @@ void Display(AFND *automate)
 //Le methode qui test toutes les fonction implementes 
 void Test_AFND()
 {
-	//Le test de l'automate standard reconnaissnat le langage vide
+	char buff[50];
+	/*
+	printf("##\tTest  de Réunion\n");
+	scanf(" %s", buff);
 	AFND *aVide = automate_vide();
 	Display(aVide);
 	
-	//Le test de l'automate standard reconnaissant le langage composÃ© du seul mot vide
+	//
+	printf("##\n\tLe test de l'automate standard reconnaissant le langage composÃ© du seul mot vide, validez en appuyant sur une touche\n");
+	scanf(" %s", buff);
 	AFND *aSeulMot = automate_Seul_Mot_vide();
 	Display(aSeulMot);
 	
 	//Le test de l'automate standard reconnaissant le langage composÃ© d'un mot d'un caractere passÃ© en parametre
+	printf("##\n\tLe test de l'automate standard reconnaissant le langage composÃ© du seul mot vide, validez en appuyant sur une touche\n");
+	scanf(" %s", buff);
 	AFND *aStandard = automate_standard('a');
 	Display(aStandard);
-	
+	*/
 	//Automates de test 
 	AFND *aTest1 = automateTestPlein();
 	AFND *aTest2 = automateTestPlein();
 	AFND *aTest3 = automateTestPlein();
 	AFND *aTest4 = automateTestPlein();
+	printf("\t####TEST DE AFND, validez une touche pour afficher l'automate de départ\n");
+	scanf(" %s", buff);
+	Display(aTest1);
+
+	printf("\t####TEST DE REUNION, l'automate ci dessus sera concatené avec lui même,  validez une touche pour afficher la REUNION\n");
+	scanf(" %s", buff);
 	
 	//Le test qui renvoi un automate standard reconnaissant la reunion des langages de deux automates  
 	AFND *aReunion = reunion_automate(aTest1, aTest2);
 	Display(aReunion);
-	
+
+
+	printf("\t####TEST DE CONCATENATION, l'automate de départ (celui sans réunion) sera concatené avec lui même,  validez une touche pour afficher la concatenation\n");
+	scanf(" %s", buff);
 	//Le test qui renvoi un automate standard reconnaissant la concatenation des langages de deux automates standard
 	AFND *aConcat = concatenation_automate(aTest3, aTest4);
 	Display(aConcat);
 	
+	printf("\t####TEST DE FERMETURE TRANSITIVE, sur l'automate (automate de départ sans réunion ni concatenation),  validez une touche pour afficher la FERMETURE\n");
+	scanf(" %s", buff);
 	//Le test qui renvoi un automate standard reconnaissant la fermeture iterative de Kleene de son langage 
 	AFND *aFermTest = automateTestPlein();
 	AFND *aFermeKleene = farmeture_automate(aFermTest);
 	Display(aFermeKleene);
+	/*
+	Desalloc_AFND(aTest1);
+	Desalloc_AFND(aTest2);
+	Desalloc_AFND(aTest3);
+	Desalloc_AFND(aTest4);
+	Desalloc_AFND(aReunion);
+	Desalloc_AFND(aConcat);
+	Desalloc_AFND(aFermeKleene);*/
+	
 }

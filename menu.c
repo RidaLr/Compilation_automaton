@@ -8,18 +8,19 @@
 int displayMenu()
 {
     printf("\n\n\n1 => Saisir votre propre automate (vous pourrez tester des mots sur cet automate)\n");
-    printf("2 => Utiliser un exemple existant (executer des automates prêts pour les tests)\n");
-    printf("3 => Creer et afficher un automate reconnaissant le langage vide\n");
-    printf("4 => Creer et afficher un automate reconnaissant le langage constitué du seul mot vide\n");
-    printf("5 => Creer et afficher un automate reconnaissant un caractère passé en paramètre\n");
-    printf("6 => Quitter le programme\n");
+    printf("2 => [TEST AFnD] Utiliser un exemple existant (executer des automates prêts pour les tests)\n");
+    printf("3 => [TEST AFD] Utiliser un exemple existant (executer des automates prêts pour les tests)\n");
+    printf("4 => Creer et afficher un automate reconnaissant le langage vide\n");
+    printf("5 => Creer et afficher un automate reconnaissant le langage constitué du seul mot vide\n");
+    printf("6 => Creer et afficher un automate reconnaissant un caractère passé en paramètre\n");
+    printf("7 => Quitter le programme\n");
     int choix = 0;
 
     do
     {
         printf("Entrez votre choix compris entre 1 - 5 :");
         scanf(" %d", &choix);
-    } while (choix < 1 || choix > 6);
+    } while (choix < 1 || choix > 7);
     return choix;
 }
 void computeChoice(int choix)
@@ -34,17 +35,20 @@ void computeChoice(int choix)
             tasksOnUserDefinedAFND(afnd);
         break;
     case 2:
+        Test_AFND();
+        break;
+    case 3:
         exucuteBuildInSamples();
         break;
 
-    case 3:
+    case 4:
         Display(automate_vide());
         break;
-    case 4:
+    case 5:
 
         Display(automate_Seul_Mot_vide());
         break;
-    case 5:
+    case 6:
 
         printf("Entrez le caractère à reconaitre\n");
         scanf(" %c", &c);
@@ -132,7 +136,7 @@ AFND *constructUserDefinedAFND()
             while (token != NULL)
             {
                 countToks++;
-               // printf(" %d %s\n", countToks, token);
+                // printf(" %d %s\n", countToks, token);
                 switch (countToks)
                 {
                 case 1:
